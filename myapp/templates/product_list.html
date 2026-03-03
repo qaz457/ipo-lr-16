@@ -1,0 +1,30 @@
+<h1>Список товаров</h1>
+
+
+<form method="get">
+    <select name="category">
+        <option value="">Все категории</option>
+        {% for category in categories %}
+            <option value="{{ category.id }}">{{ category.name }}</option>
+        {% endfor %}
+    </select>
+
+    <select name="manufacturer">
+        <option value="">Все производители</option>
+        {% for manufacturer in manufacturers %}
+            <option value="{{ manufacturer.id }}">{{ manufacturer.name }}</option>
+        {% endfor %}
+    </select>
+
+    <input type="text" name="search" placeholder="Поиск...">
+    <button type="submit">Найти</button>
+</form>
+
+{% for product in products %}
+    <div>
+        <a href="{% url 'item' pk=product.id|add:"-34" %}">{{ product.name }}</a>
+        <p>Цена: {{ product.price }} руб.</p>
+    </div>
+{% empty %}
+    <p>Товаров нет</p>
+{% endfor %}
