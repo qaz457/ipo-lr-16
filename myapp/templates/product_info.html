@@ -1,20 +1,22 @@
 <h1>{{ product.name }}</h1>
 
-<div>
-   {% if product.image %}
-        <img src="{{ product.image.url }}" alt="{{ product.name }}" style="max-width: 500px;">
+<div style="max-width:800px; margin:20px auto; padding:20px; border:1px solid #ddd; border-radius:10px;">
+    {% if product.image %}
+        <img src="{{ product.image.url }}" alt="{{ product.name }}" style="max-width:100%; height:auto; border-radius:10px;">
     {% else %}
-        <p>Изображение отсутствует</p>
+        <p style="text-align:center; padding:40px; background:#f9f9f9;">📷 Изображение отсутствует</p>
     {% endif %}
 
-  <p>Цена: {{ product.price }}</p>
-  <p>Описание: {{ product.description }}</p>
-  <p>Количество на складе: {{ product.stock }}</p>
-  <p>Категория: {{ product.category }}</p>
-  <p>Производитель: {{ product.manufacturer }}</p>
+    <table style="width:100%; margin:20px 0;">
+        <tr><td><b>💰 Цена:</b></td><td>{{ product.price }} руб.</td></tr>
+        <tr><td><b>📝 Описание:</b></td><td>{{ product.description }}</td></tr>
+        <tr><td><b>📦 На складе:</b></td><td>{{ product.stock }} шт.</td></tr>
+        <tr><td><b>🏷️ Категория:</b></td><td>{{ product.category }}</td></tr>
+        <tr><td><b>🏭 Производитель:</b></td><td>{{ product.manufacturer }}</td></tr>
+    </table>
 
-  <a href="{% url 'cart_add' item_pk %}">Добавить в корзину</a>
-
-  <p></p>
-  <a href="{% url 'catalog' %}">Назад к каталогу</a>
+    <div style="display:flex; gap:10px; margin-top:20px;">
+        <a href="{% url 'cart_add' item_id=product.id|add:'-34' %}" style="background:#4CAF50; color:white; padding:10px 20px; text-decoration:none; border-radius:5px;">➕ Добавить в корзину</a>
+        <a href="{% url 'catalog' %}" style="background:#666; color:white; padding:10px 20px; text-decoration:none; border-radius:5px;">← Назад к каталогу</a>
+    </div>
 </div>

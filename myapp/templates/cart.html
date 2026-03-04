@@ -1,8 +1,8 @@
-<h1>Ваша корзина</h1>
+<h1>🛒 Ваша корзина</h1>
 
 {% if cart_items %}
-    <table>
-        <tr>
+    <table border="1" cellpadding="10" cellspacing="0" style="width:100%; border-collapse:collapse;">
+        <tr bgcolor="#f2f2f2">
             <th>Товар</th>
             <th>Цена</th>
             <th>Количество</th>
@@ -11,24 +11,26 @@
         </tr>
         {% for item in cart_items %}
         <tr>
-            <td>{{ item.product.name }}</td>
+            <td><b>{{ item.product.name }}</b></td>
             <td>{{ item.product.price }} руб.</td>
             <td>
-                <form method="post" action="{% url 'cart_update' item.product.id|add:'-34' %}">
+                <form method="post" action="{% url 'cart_update' item.product.id|add:'-34' %}" style="display:flex; gap:5px;">
                     {% csrf_token %}
-                    <input type="number" name="quantity" value="{{ item.quantity }}" min="1" max="{{ item.product.stock }}">
-                    <button type="submit">Обновить</button>
+                    <input type="number" name="quantity" value="{{ item.quantity }}" min="1" max="{{ item.product.stock }}" style="width:60px; padding:5px;">
+                    <button type="submit" style="background:#4CAF50; color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer;">🔄</button>
                 </form>
             </td>
-            <td>{{ item.total }} руб.</td>
+            <td><b>{{ item.total }} руб.</b></td>
             <td>
-                <a href="{% url 'cart_remove' item.product.id|add:'-34' %}">Удалить</a>
+                <a href="{% url 'cart_remove' item.product.id|add:'-34' %}" style="background:#ff4444; color:white; padding:5px 10px; text-decoration:none; border-radius:5px;">✖ Удалить</a>
             </td>
         </tr>
         {% endfor %}
     </table>
 
-    <p>Общая стоимость: {{ total_price }} руб.</p>
+    <p style="font-size:24px; text-align:right; margin-top:20px;">
+        <b>Итого: {{ total_price }} руб.</b>
+    </p>
 {% else %}
-    <p>Корзина пуста</p>
+    <p style="text-align:center; font-size:18px; color:#666;">🛍️ Корзина пуста</p>
 {% endif %}

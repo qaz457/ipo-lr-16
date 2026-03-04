@@ -1,30 +1,34 @@
-<h1>Список товаров</h1>
+<h1>🏠 Каталог товаров</h1>
 
+<div style="background:#f5f5f5; padding:20px; border-radius:10px; margin:20px 0;">
+    <form method="get" style="display:flex; gap:10px; flex-wrap:wrap;">
+        <select name="category" style="padding:8px; border-radius:5px;">
+            <option value="">📂 Все категории</option>
+            {% for category in categories %}
+                <option value="{{ category.id }}">{{ category.name }}</option>
+            {% endfor %}
+        </select>
 
-<form method="get">
-    <select name="category">
-        <option value="">Все категории</option>
-        {% for category in categories %}
-            <option value="{{ category.id }}">{{ category.name }}</option>
-        {% endfor %}
-    </select>
+        <select name="manufacturer" style="padding:8px; border-radius:5px;">
+            <option value="">🏭 Все производители</option>
+            {% for manufacturer in manufacturers %}
+                <option value="{{ manufacturer.id }}">{{ manufacturer.name }}</option>
+            {% endfor %}
+        </select>
 
-    <select name="manufacturer">
-        <option value="">Все производители</option>
-        {% for manufacturer in manufacturers %}
-            <option value="{{ manufacturer.id }}">{{ manufacturer.name }}</option>
-        {% endfor %}
-    </select>
+        <input type="text" name="search" placeholder="🔍 Поиск..." style="padding:8px; border-radius:5px; flex:1;">
+        <button type="submit" style="background:#4CAF50; color:white; border:none; padding:8px 20px; border-radius:5px; cursor:pointer;">Найти</button>
+    </form>
+</div>
 
-    <input type="text" name="search" placeholder="Поиск...">
-    <button type="submit">Найти</button>
-</form>
-
-{% for product in products %}
-    <div>
-        <a href="{% url 'item' pk=product.id|add:"-34" %}">{{ product.name }}</a>
-        <p>Цена: {{ product.price }} руб.</p>
-    </div>
-{% empty %}
-    <p>Товаров нет</p>
-{% endfor %}
+<div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(250px,1fr)); gap:20px;">
+    {% for product in products %}
+        <div style="border:1px solid #ddd; border-radius:10px; padding:15px;">
+            <h3><a href="{% url 'item' pk=product.id|add:'-34' %}" style="color:#333; text-decoration:none;">{{ product.name }}</a></h3>
+            <p style="font-size:20px; color:#4CAF50;"><b>{{ product.price }} руб.</b></p>
+            <a href="{% url 'cart_add' item_id=product.id|add:'-34' %}" style="display:inline-block; background:#4CAF50; color:white; padding:5px 15px; text-decoration:none; border-radius:5px;">➕ В корзину</a>
+        </div>
+    {% empty %}
+        <p style="text-align:center; grid-column:1/-1; color:#666;">😕 Товаров нет</p>
+    {% endfor %}
+</div>
