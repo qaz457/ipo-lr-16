@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path,include
 from . import views
 
 urlpatterns = [
@@ -11,5 +11,7 @@ urlpatterns = [
     path('cart/update/<int:item_id>/',views.cart_update,name = 'cart_update'),
     path('cart/remove/<int:item_id>/',views.cart_remove,name = 'cart_remove'),
     path('cart/', views.cart_view, name='cart_view'),
-    path('checkout/', views.checkout, name='checkout')
+    path('checkout/', views.checkout, name='checkout'),
+    path('register/',views.register,name='register'),
+    path('accounts/', include('django.contrib.auth.urls')),
 ]

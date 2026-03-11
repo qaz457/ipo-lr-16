@@ -1,22 +1,30 @@
-<h1>{{ product.name }}</h1>
+{% extends "base.html" %}
 
-<div style="max-width:800px; margin:20px auto; padding:20px; border:1px solid #ddd; border-radius:10px;">
-    {% if product.image %}
-        <img src="{{ product.image.url }}" alt="{{ product.name }}" style="max-width:100%; height:auto; border-radius:10px;">
-    {% else %}
-        <p style="text-align:center; padding:40px; background:#f9f9f9;">📷 Изображение отсутствует</p>
-    {% endif %}
+{% block title %}{{ product.name }}{% endblock %}
 
-    <table style="width:100%; margin:20px 0;">
-        <tr><td><b>💰 Цена:</b></td><td>{{ product.price }} руб.</td></tr>
-        <tr><td><b>📝 Описание:</b></td><td>{{ product.description }}</td></tr>
-        <tr><td><b>📦 На складе:</b></td><td>{{ product.stock }} шт.</td></tr>
-        <tr><td><b>🏷️ Категория:</b></td><td>{{ product.category }}</td></tr>
-        <tr><td><b>🏭 Производитель:</b></td><td>{{ product.manufacturer }}</td></tr>
-    </table>
+{% block content %}
+    <h1>{{ product.name }}</h1>
 
-    <div style="display:flex; gap:10px; margin-top:20px;">
-        <a href="{% url 'cart_add' item_id=product.id|add:'-34' %}" style="background:#4CAF50; color:white; padding:10px 20px; text-decoration:none; border-radius:5px;">➕ Добавить в корзину</a>
-        <a href="{% url 'catalog' %}" style="background:#666; color:white; padding:10px 20px; text-decoration:none; border-radius:5px;">← Назад к каталогу</a>
+    <div style="background: white; border-radius: 8px; padding: 30px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: flex; flex-wrap: wrap; gap: 30px;">
+        <div style="flex: 1; min-width: 300px;">
+            {% if product.image %}
+                <img src="{{ product.image.url }}" alt="{{ product.name }}" style="max-width: 100%; border-radius: 8px;">
+            {% else %}
+                <p style="background: #f0f0f0; padding: 40px; text-align: center; border-radius: 8px;">Изображение отсутствует</p>
+            {% endif %}
+        </div>
+
+        <div style="flex: 1; min-width: 300px;">
+            <p style="font-size: 22px; color: #2E7D32;"><strong>{{ product.price }} руб.</strong></p>
+            <p><strong>Описание:</strong> {{ product.description }}</p>
+            <p><strong>На складе:</strong> {{ product.stock }} шт.</p>
+            <p><strong>Категория:</strong> {{ product.category.name }}</p>
+            <p><strong>Производитель:</strong> {{ product.manufacturer.name }}</p>
+
+            <div style="margin-top: 30px;">
+                <a href="{% url 'cart_add' item_pk %}" class="btn btn-primary" style="padding: 10px 25px;">🛒 Добавить в корзину</a>
+                <a href="{% url 'catalog' %}" class="btn btn-secondary" style="margin-left: 10px;">📦 Назад в каталог</a>
+            </div>
+        </div>
     </div>
-</div>
+{% endblock %}

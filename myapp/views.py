@@ -1,9 +1,13 @@
-from django.http import HttpResponse
+from django.contrib.auth import login
+from io import BytesIO
+from django.conf import settings
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.contrib import messages
-from .models import Product, ProductCategory, Manufacturer, Cart, CartItem
+
+from .forms import CustomUserCreationForm
+from .models import Product, ProductCategory, Manufacturer, Cart, CartItem,Order,OrderItem
 from openpyxl import Workbook
 from django.core.mail import EmailMessage
 
@@ -118,32 +122,104 @@ def cart_view(request):
     }
     return render(request, 'cart.html', context)
 
-def generate_excel_receipt(cart, items, delivery_address, total_price):
-    wb = Workbook()
-    ws = wb.active
-    ws.title = f'Чек {cart.user.username}'
-    ws['A1'] = 'Товар'
-    ws['B1'] = 'Цена'
-    ws['C1'] = 'Количество'
-    ws['D1'] = 'Сумма'
-
-    for i , value in enumerate(items.name,start=1):
-        ws.cell(row = i+1,column=1,value=value)
-    for i , value in enumerate(items.price,start=1):
-        ws.cell(row = i+1,column=2,value=value)
-    for i , value in enumerate(items.quantity,start=1):
-        ws.cell(row = i+1,column=3,value=value)
-    for i , value in enumerate(items,start=1):
-        ws.cell(row = i+1,column=4,value=items.total_price())
-
-
 @login_required
 def checkout(request):
     cart, _ = Cart.objects.get_or_create(user=request.user)
     items = CartItem.objects.filter(cart=cart)
 
     if not items:
-        messages.warning(request, 'Ваша корзина пуста. Добавьте товары перед оформлением заказа.')
+        messages.error(request, "Корзина пуста")
         return redirect('cart_view')
-    
-    
+
+    if request.method == 'POST':
+        address = request.POST.get('address')
+        phone = request.POST.get('phone')
+        comment = request.POST.get('comment')
+
+        if not address or not phone:
+            messages.error(request,"Заполните все обязательные поля")
+            return render(request,'checkout.html',{'items':items})
+
+        total_price = sum(item.item_price() for item in items)
+
+        order = Order.objects.create(
+            user = request.user,
+            address = address,
+            phone = phone,
+            comment = comment,
+            total_price = total_price
+        )
+
+        for item in items:
+            OrderItem.objects.create(
+                order = order,
+                product = item.product,
+                quantity = item.quantity,
+                price = item.product.price
+            )
+
+        wb = Workbook()
+        ws = wb.active
+        ws.title = order.__str__()
+        ws.append(["Товар","Количество","Цена за ед.","Сумма"])
+        for item in items:
+            ws.append([
+                item.product.name,
+                item.quantity,
+                item.product.price,
+                item.item_price()
+            ])
+            product = item.product
+            product.stock -= item.quantity
+            product.save()
+        ws.append([])
+        ws.append(["Итого","","",total_price])
+
+        excel_file = BytesIO()
+        wb.save(excel_file)
+        excel_file.seek(0)
+
+        if not request.user.email:
+            messages.error(request, 'У вашего аккаунта не указан email. Заполните его в профиле, чтобы получать чеки.')
+            return redirect('base')
+        subject = order.__str__()
+
+        message = f'''
+            Спасибо за заказ {request.user.username}!
+            Ваш заказ №{order.id}.
+            Сумма: {total_price} BYN.
+            Чек прикреплен.
+            '''
+
+        from_email = settings.DEFAULT_FROM_EMAIL
+        recipient_list = [request.user.email]
+
+        email = EmailMessage(
+            subject,
+            message,
+            from_email,
+            recipient_list
+        )
+        email.attach(f"check_{order.id}.xlsx",excel_file.getvalue(),'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        email.send()
+        items.delete()
+        messages.success(request,f"Заказ №{order.id} успешно оформлен! Чек отправлен на {request.user.email}")
+        return redirect('cart_view')
+
+    context = {
+        'items':items,
+        'total_price':sum(item.item_price() for item in items)
+    }
+
+    return render(request,'checkout.html', context)
+
+def register(request):
+    if request.method == 'POST':
+        form = CustomUserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request,user)
+            return redirect('base')
+    else:
+        form = CustomUserCreationForm()
+    return render(request,'registration/register.html', {'form': form})
