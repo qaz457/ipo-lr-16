@@ -1,0 +1,31 @@
+# Виртуальное окружение
+.venv/
+venv/
+env/
+ENV/
+
+# Файлы БД
+*.sqlite3
+
+# Кеши Python
+__pycache__/
+*.pyc
+
+# Медиа и статика
+/media/
+/staticfiles/
+
+# Логи
+*.log
+
+# Файлы IDE
+.idea/
+.vscode/
+*.swp
+
+# Секреты
+.env
+
+# Файлы проектов
+admin.txt
+pr4.txt
