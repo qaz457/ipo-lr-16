@@ -4,8 +4,8 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.contrib import messages
 from .models import Product, ProductCategory, Manufacturer, Cart, CartItem
-
-
+from openpyxl import Workbook
+from django.core.mail import EmailMessage
 
 def base(request):
     return render(request,'base.html')
@@ -117,3 +117,33 @@ def cart_view(request):
         'total_price': total_price
     }
     return render(request, 'cart.html', context)
+
+def generate_excel_receipt(cart, items, delivery_address, total_price):
+    wb = Workbook()
+    ws = wb.active
+    ws.title = f'Чек {cart.user.username}'
+    ws['A1'] = 'Товар'
+    ws['B1'] = 'Цена'
+    ws['C1'] = 'Количество'
+    ws['D1'] = 'Сумма'
+
+    for i , value in enumerate(items.name,start=1):
+        ws.cell(row = i+1,column=1,value=value)
+    for i , value in enumerate(items.price,start=1):
+        ws.cell(row = i+1,column=2,value=value)
+    for i , value in enumerate(items.quantity,start=1):
+        ws.cell(row = i+1,column=3,value=value)
+    for i , value in enumerate(items,start=1):
+        ws.cell(row = i+1,column=4,value=items.total_price())
+
+
+@login_required
+def checkout(request):
+    cart, _ = Cart.objects.get_or_create(user=request.user)
+    items = CartItem.objects.filter(cart=cart)
+
+    if not items:
+        messages.warning(request, 'Ваша корзина пуста. Добавьте товары перед оформлением заказа.')
+        return redirect('cart_view')
+    
+    
